@@ -17,6 +17,12 @@
   ([#5364](https://github.com/facebook/jest/pull/5364))
 * `[docs]` Add tutorial page for ES6 class mocks.
   ([#5383]https://github.com/facebook/jest/pull/5383))
+* `[jest-resolve]` Detect absolute paths in `moduleDirectories`.
+  Do not generate additional (invalid) paths
+  by prepending each ancestor of `cwd` to the absolute path.
+  Additionally, this patch fixes the functionality in Windows OS.
+  ([#5396](https://github.com/facebook/jest/issues/5396))
+  ([#5398](https://github.com/facebook/jest/pull/5398))
 
 ## jest 22.1.4
 
