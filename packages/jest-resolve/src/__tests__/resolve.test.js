@@ -185,24 +185,24 @@ describe('getMockModule', () => {
 describe('Resolver.getModulePaths() -> nodeModulesPaths()', () => {
   let moduleMap;
 
-  let path_methods = {
-    names: ["dirname", "resolve", "parse", "isAbsolute", "join"],
-    cache: {}
+  const path_methods = {
+    cache: {},
+    names: ['dirname', 'resolve', 'parse', 'isAbsolute', 'join'],
   };
 
-  let save_path = () => {
+  const save_path = () => {
     path_methods.names.forEach(name => {
       path_methods.cache[name] = path[name];
     });
   };
 
-  let update_path = os => {
+  const update_path = os => {
     path_methods.names.forEach(name => {
-      path[name] = path[os][name]
+      path[name] = path[os][name];
     });
   };
 
-  let restore_path = () => {
+  const restore_path = () => {
     path_methods.names.forEach(name => {
       path[name] = path_methods.cache[name];
     });
@@ -258,5 +258,4 @@ describe('Resolver.getModulePaths() -> nodeModulesPaths()', () => {
     const dirs_actual = resolver.getModulePaths(cwd);
     expect(dirs_actual).toEqual(expect.arrayContaining(dirs_expected));
   });
-
 });
