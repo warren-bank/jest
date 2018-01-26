@@ -192,9 +192,8 @@ describe('Resolver.getModulePaths() -> nodeModulesPaths()', () => {
   };
 
   const save_path = () => {
-    path_methods.platform = path.resolve === path.win32.resolve
-      ? 'win32'
-      : 'posix';
+    path_methods.platform =
+      path.resolve === path.win32.resolve ? 'win32' : 'posix';
 
     path_methods.names.forEach(name => {
       path_methods.cache[name] = path[name];
@@ -212,7 +211,7 @@ describe('Resolver.getModulePaths() -> nodeModulesPaths()', () => {
 
     path_methods.names.forEach(name => {
       path[os][name] = path_methods.cache[name];
-      path[name]     = path_methods.cache[name];
+      path[name] = path_methods.cache[name];
     });
   };
 
@@ -237,7 +236,7 @@ describe('Resolver.getModulePaths() -> nodeModulesPaths()', () => {
     ];
     const dirs_actual = resolver.getModulePaths(cwd);
     expect(dirs_actual).toEqual(expect.arrayContaining(dirs_expected));
-  }
+  };
 
   const test_posix = expect => {
     const cwd = '/temp/project';
@@ -253,30 +252,30 @@ describe('Resolver.getModulePaths() -> nodeModulesPaths()', () => {
     ];
     const dirs_actual = resolver.getModulePaths(cwd);
     expect(dirs_actual).toEqual(expect.arrayContaining(dirs_expected));
-  }
+  };
 
   // run tests sequentially
   it('can resolve node modules relative to absolute paths in "moduleDirectories" on all platforms', () => {
     return Promise.resolve(expect)
     .then(expect => {
-      save_path();
-      return expect;
+        save_path();
+        return expect;
     })
     .then(expect => {
-      update_path('win32');
-      test_win32(expect);
-      restore_path();
-      return expect;
+        update_path('win32');
+        test_win32(expect);
+        restore_path();
+        return expect;
     })
     .then(expect => {
-      update_path('posix');
-      test_posix(expect);
-      restore_path();
-      return expect;
+        update_path('posix');
+        test_posix(expect);
+        restore_path();
+        return expect;
     })
     .catch(error => {
-      restore_path();
-      throw error;
-    })
+        restore_path();
+        throw error;
+    });
   });
 });
