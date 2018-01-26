@@ -257,25 +257,25 @@ describe('Resolver.getModulePaths() -> nodeModulesPaths()', () => {
   // run tests sequentially
   it('can resolve node modules relative to absolute paths in "moduleDirectories" on all platforms', () => {
     return Promise.resolve(expect)
-    .then(expect => {
+      .then(expect => {
         save_path();
         return expect;
-    })
-    .then(expect => {
+      })
+      .then(expect => {
         update_path('win32');
         test_win32(expect);
         restore_path();
         return expect;
-    })
-    .then(expect => {
+      })
+      .then(expect => {
         update_path('posix');
         test_posix(expect);
         restore_path();
         return expect;
-    })
-    .catch(error => {
+      })
+      .catch(error => {
         restore_path();
         throw error;
-    });
+      });
   });
 });
