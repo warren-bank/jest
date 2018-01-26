@@ -200,12 +200,6 @@ describe('Resolver.getModulePaths() -> nodeModulesPaths()', () => {
     });
   };
 
-  const update_path = os => {
-    path_methods.names.forEach(name => {
-      path[name] = path[os][name];
-    });
-  };
-
   const restore_path = () => {
     const os = path_methods.platform;
 
@@ -215,6 +209,18 @@ describe('Resolver.getModulePaths() -> nodeModulesPaths()', () => {
     });
   };
 
+  const update_path = os => {
+    restore_path();
+
+    path_methods.names.forEach(name => {
+      path[name] = path[os][name];
+    });
+  };
+
+  beforeAll(() => {
+    save_path();
+  });
+
   beforeEach(() => {
     moduleMap = new ModuleMap({
       duplicates: [],
@@ -223,7 +229,13 @@ describe('Resolver.getModulePaths() -> nodeModulesPaths()', () => {
     });
   });
 
-  const test_win32 = expect => {
+  afterAll(() => {
+    restore_path();
+  });
+
+  it('can resolve node modules relative to absolute paths in "moduleDirectories" on Windows platforms', () => {
+    update_path('win32');
+
     const cwd = 'D:\\project';
     const src = 'C:\\path\\to\\node_modules';
     const resolver = new Resolver(moduleMap, {
@@ -236,9 +248,11 @@ describe('Resolver.getModulePaths() -> nodeModulesPaths()', () => {
     ];
     const dirs_actual = resolver.getModulePaths(cwd);
     expect(dirs_actual).toEqual(expect.arrayContaining(dirs_expected));
-  };
+  });
 
-  const test_posix = expect => {
+  it('can resolve node modules relative to absolute paths in "moduleDirectories" on Posix platforms', () => {
+    update_path('posix');
+
     const cwd = '/temp/project';
     const src = '/root/path/to/node_modules';
     const resolver = new Resolver(moduleMap, {
@@ -252,30 +266,5 @@ describe('Resolver.getModulePaths() -> nodeModulesPaths()', () => {
     ];
     const dirs_actual = resolver.getModulePaths(cwd);
     expect(dirs_actual).toEqual(expect.arrayContaining(dirs_expected));
-  };
-
-  // run tests sequentially
-  it('can resolve node modules relative to absolute paths in "moduleDirectories" on all platforms', () => {
-    return Promise.resolve(expect)
-      .then(expect => {
-        save_path();
-        return expect;
-      })
-      .then(expect => {
-        update_path('win32');
-        test_win32(expect);
-        restore_path();
-        return expect;
-      })
-      .then(expect => {
-        update_path('posix');
-        test_posix(expect);
-        restore_path();
-        return expect;
-      })
-      .catch(error => {
-        restore_path();
-        throw error;
-      });
   });
 });
