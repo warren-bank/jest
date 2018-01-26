@@ -187,7 +187,7 @@ describe('Resolver.getModulePaths() -> nodeModulesPaths()', () => {
 
   const path_methods = {
     cache: {},
-    names: ['dirname', 'resolve', 'parse', 'isAbsolute', 'join'],
+    names: ['dirname', 'resolve', 'parse', 'isAbsolute', 'join', 'sep'],
   };
 
   const save_path = () => {
