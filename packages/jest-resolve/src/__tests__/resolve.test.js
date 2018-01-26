@@ -181,3 +181,32 @@ describe('getMockModule', () => {
     );
   });
 });
+
+describe('Resolver.getModulePaths() -> nodeModulesPaths()', () => {
+  let moduleMap;
+  beforeEach(() => {
+    moduleMap = new ModuleMap({
+      duplicates: [],
+      map: [],
+      mocks: [],
+    });
+  });
+
+  it('can resolve node modules relative to absolute paths in "moduleDirectories"', () => {
+    const cwd = 'D:\\project';
+    const src = 'C:\\path\\to\\node_modules';
+    const resolver = new Resolver(moduleMap, {
+      moduleDirectories: [
+        src,
+        'node_modules',
+      ],
+    });
+    const dirs_expected = [
+      src,
+      cwd + '\\node_modules',
+      path.dirname(cwd).replace(/\\$/, '') + '\\node_modules',
+    ];
+    const dirs_actual = resolver.getModulePaths(cwd);
+    expect(dirs_actual).toEqual(expect.arrayContaining(dirs_expected));
+  });
+});
