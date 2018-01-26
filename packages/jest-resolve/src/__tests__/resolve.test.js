@@ -184,6 +184,34 @@ describe('getMockModule', () => {
 
 describe('Resolver.getModulePaths() -> nodeModulesPaths()', () => {
   let moduleMap;
+
+  let path_methods = {
+    names: ["dirname", "resolve", "parse", "isAbsolute", "join"],
+    cache: {}
+  };
+
+  let save_path = () => {
+    path_methods.names.forEach(name => {
+      path_methods.cache[name] = path[name];
+    });
+  };
+
+  let update_path = os => {
+    path_methods.names.forEach(name => {
+      path[name] = path[os][name]
+    });
+  };
+
+  let restore_path = () => {
+    path_methods.names.forEach(name => {
+      path[name] = path_methods.cache[name];
+    });
+  };
+
+  beforeAll(() => {
+    save_path();
+  });
+
   beforeEach(() => {
     moduleMap = new ModuleMap({
       duplicates: [],
@@ -192,14 +220,17 @@ describe('Resolver.getModulePaths() -> nodeModulesPaths()', () => {
     });
   });
 
-  it('can resolve node modules relative to absolute paths in "moduleDirectories"', () => {
+  afterAll(() => {
+    restore_path();
+  });
+
+  it('can resolve node modules relative to absolute paths in "moduleDirectories" on Windows platforms', () => {
+    update_path('win32');
+
     const cwd = 'D:\\project';
     const src = 'C:\\path\\to\\node_modules';
     const resolver = new Resolver(moduleMap, {
-      moduleDirectories: [
-        src,
-        'node_modules',
-      ],
+      moduleDirectories: [src, 'node_modules'],
     });
     const dirs_expected = [
       src,
@@ -209,4 +240,23 @@ describe('Resolver.getModulePaths() -> nodeModulesPaths()', () => {
     const dirs_actual = resolver.getModulePaths(cwd);
     expect(dirs_actual).toEqual(expect.arrayContaining(dirs_expected));
   });
+
+  it('can resolve node modules relative to absolute paths in "moduleDirectories" on Posix platforms', () => {
+    update_path('posix');
+
+    const cwd = '/temp/project';
+    const src = '/root/path/to/node_modules';
+    const resolver = new Resolver(moduleMap, {
+      moduleDirectories: [src, 'node_modules'],
+    });
+    const dirs_expected = [
+      src,
+      cwd + '/node_modules',
+      path.dirname(cwd) + '/node_modules',
+      '/node_modules',
+    ];
+    const dirs_actual = resolver.getModulePaths(cwd);
+    expect(dirs_actual).toEqual(expect.arrayContaining(dirs_expected));
+  });
+
 });
