@@ -224,7 +224,7 @@ describe('Resolver.getModulePaths() -> nodeModulesPaths()', () => {
     restore_path();
   });
 
-  const test_win32 = (expect) => {
+  const test_win32 = expect => {
     update_path('win32');
 
     const cwd = 'D:\\project';
@@ -241,7 +241,7 @@ describe('Resolver.getModulePaths() -> nodeModulesPaths()', () => {
     expect(dirs_actual).toEqual(expect.arrayContaining(dirs_expected));
   };
 
-  const test_posix = (expect) => {
+  const test_posix = expect => {
     update_path('posix');
 
     const cwd = '/temp/project';
