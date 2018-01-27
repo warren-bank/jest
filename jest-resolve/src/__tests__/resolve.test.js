@@ -188,9 +188,14 @@ describe('Resolver.getModulePaths() -> nodeModulesPaths()', () => {
   const path_methods = {
     cache: {},
     names: ['dirname', 'resolve', 'parse', 'isAbsolute', 'join'],
+    platform: '',
   };
 
   const save_path = () => {
+    path_methods.platform = path.resolve === path.win32.resolve
+      ? 'win32'
+      : 'posix';
+
     path_methods.names.forEach(name => {
       path_methods.cache[name] = path[name];
     });
@@ -203,8 +208,11 @@ describe('Resolver.getModulePaths() -> nodeModulesPaths()', () => {
   };
 
   const restore_path = () => {
+    const os = path_methods.platform;
+
     path_methods.names.forEach(name => {
-      path[name] = path_methods.cache[name];
+      path[os][name] = path_methods.cache[name];
+      path[name]     = path_methods.cache[name];
     });
   };
 
@@ -217,8 +225,6 @@ describe('Resolver.getModulePaths() -> nodeModulesPaths()', () => {
   });
 
   const test_win32 = expect => {
-    //update_path('win32');
-
     const cwd = 'D:\\project';
     const src = 'C:\\path\\to\\node_modules';
     const resolver = new Resolver(moduleMap, {
@@ -234,8 +240,6 @@ describe('Resolver.getModulePaths() -> nodeModulesPaths()', () => {
   }
 
   const test_posix = expect => {
-    //update_path('posix');
-
     const cwd = '/temp/project';
     const src = '/root/path/to/node_modules';
     const resolver = new Resolver(moduleMap, {
@@ -261,14 +265,12 @@ describe('Resolver.getModulePaths() -> nodeModulesPaths()', () => {
     .then(expect => {
       update_path('win32');
       test_win32(expect);
+      restore_path();
       return expect;
     })
     .then(expect => {
       update_path('posix');
       test_posix(expect);
-      return expect;
-    })
-    .then(expect => {
       restore_path();
       return expect;
     })
