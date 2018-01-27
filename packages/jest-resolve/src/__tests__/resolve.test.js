@@ -186,13 +186,25 @@ describe('getMockModule', () => {
 describe('Resolver.getModulePaths() -> nodeModulesPaths()', () => {
   let moduleMap;
 
-  beforeEach(() => {
+  beforeAll(() => {
     jest.resetModules();
+  });
+
+  beforeEach(() => {
     moduleMap = new ModuleMap({
       duplicates: [],
       map: [],
       mocks: [],
     });
+  });
+
+  afterEach(() => {
+    jest.resetModules();
+  });
+
+  afterAll(() => {
+    jest.dontMock('path');
+    Resolver = require('../');
   });
 
   it('can resolve node modules relative to absolute paths in "moduleDirectories" on Windows platforms', () => {
