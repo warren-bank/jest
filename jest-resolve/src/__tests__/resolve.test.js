@@ -208,10 +208,6 @@ describe('Resolver.getModulePaths() -> nodeModulesPaths()', () => {
     });
   };
 
-  beforeAll(() => {
-    save_path();
-  });
-
   beforeEach(() => {
     moduleMap = new ModuleMap({
       duplicates: [],
@@ -220,12 +216,8 @@ describe('Resolver.getModulePaths() -> nodeModulesPaths()', () => {
     });
   });
 
-  afterAll(() => {
-    restore_path();
-  });
-
-  it('can resolve node modules relative to absolute paths in "moduleDirectories" on Windows platforms', () => {
-    update_path('win32');
+  const test_win32 = expect => {
+    //update_path('win32');
 
     const cwd = 'D:\\project';
     const src = 'C:\\path\\to\\node_modules';
@@ -239,10 +231,10 @@ describe('Resolver.getModulePaths() -> nodeModulesPaths()', () => {
     ];
     const dirs_actual = resolver.getModulePaths(cwd);
     expect(dirs_actual).toEqual(expect.arrayContaining(dirs_expected));
-  });
+  }
 
-  it('can resolve node modules relative to absolute paths in "moduleDirectories" on Posix platforms', () => {
-    update_path('posix');
+  const test_posix = expect => {
+    //update_path('posix');
 
     const cwd = '/temp/project';
     const src = '/root/path/to/node_modules';
@@ -257,5 +249,32 @@ describe('Resolver.getModulePaths() -> nodeModulesPaths()', () => {
     ];
     const dirs_actual = resolver.getModulePaths(cwd);
     expect(dirs_actual).toEqual(expect.arrayContaining(dirs_expected));
+  }
+
+  // run tests sequentially
+  it('can resolve node modules relative to absolute paths in "moduleDirectories" on all platforms', () => {
+    return Promise.resolve(expect)
+    .then(expect => {
+      save_path();
+      return expect;
+    })
+    .then(expect => {
+      update_path('win32');
+      test_win32(expect);
+      return expect;
+    })
+    .then(expect => {
+      update_path('posix');
+      test_posix(expect);
+      return expect;
+    })
+    .then(expect => {
+      restore_path();
+      return expect;
+    })
+    .catch(error => {
+      restore_path();
+      throw error;
+    })
   });
 });
