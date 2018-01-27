@@ -10,11 +10,12 @@
 
 jest.mock('../__mocks__/userResolver');
 
-const fs = require('fs');
-const path = require('path');
-const ModuleMap = require('jest-haste-map').ModuleMap;
-const Resolver = require('../');
-const userResolver = require('../__mocks__/userResolver');
+import fs from 'fs';
+import path from 'path';
+import {ModuleMap} from 'jest-haste-map';
+import userResolver from '../__mocks__/userResolver';
+
+let Resolver = require('../');
 
 beforeEach(() => {
   userResolver.mockClear();
@@ -185,43 +186,8 @@ describe('getMockModule', () => {
 describe('Resolver.getModulePaths() -> nodeModulesPaths()', () => {
   let moduleMap;
 
-  const path_methods = {
-    cache: {},
-    names: ['dirname', 'resolve', 'parse', 'isAbsolute', 'join'],
-    platform: '',
-  };
-
-  const save_path = () => {
-    path_methods.platform =
-      path.resolve === path.win32.resolve ? 'win32' : 'posix';
-
-    path_methods.names.forEach(name => {
-      path_methods.cache[name] = path[name];
-    });
-  };
-
-  const restore_path = () => {
-    const os = path_methods.platform;
-
-    path_methods.names.forEach(name => {
-      path[os][name] = path_methods.cache[name];
-      path[name] = path_methods.cache[name];
-    });
-  };
-
-  const update_path = os => {
-    restore_path();
-
-    path_methods.names.forEach(name => {
-      path[name] = path[os][name];
-    });
-  };
-
-  beforeAll(() => {
-    save_path();
-  });
-
   beforeEach(() => {
+    jest.resetModules();
     moduleMap = new ModuleMap({
       duplicates: [],
       map: [],
@@ -229,12 +195,9 @@ describe('Resolver.getModulePaths() -> nodeModulesPaths()', () => {
     });
   });
 
-  afterAll(() => {
-    restore_path();
-  });
-
   it('can resolve node modules relative to absolute paths in "moduleDirectories" on Windows platforms', () => {
-    update_path('win32');
+    jest.doMock('path', () => path.win32);
+    Resolver = require('../');
 
     const cwd = 'D:\\project';
     const src = 'C:\\path\\to\\node_modules';
@@ -244,14 +207,15 @@ describe('Resolver.getModulePaths() -> nodeModulesPaths()', () => {
     const dirs_expected = [
       src,
       cwd + '\\node_modules',
-      path.dirname(cwd).replace(/\\$/, '') + '\\node_modules',
+      path.win32.dirname(cwd).replace(/\\$/, '') + '\\node_modules',
     ];
     const dirs_actual = resolver.getModulePaths(cwd);
     expect(dirs_actual).toEqual(expect.arrayContaining(dirs_expected));
   });
 
   it('can resolve node modules relative to absolute paths in "moduleDirectories" on Posix platforms', () => {
-    update_path('posix');
+    jest.doMock('path', () => path.posix);
+    Resolver = require('../');
 
     const cwd = '/temp/project';
     const src = '/root/path/to/node_modules';
@@ -261,7 +225,7 @@ describe('Resolver.getModulePaths() -> nodeModulesPaths()', () => {
     const dirs_expected = [
       src,
       cwd + '/node_modules',
-      path.dirname(cwd) + '/node_modules',
+      path.posix.dirname(cwd) + '/node_modules',
       '/node_modules',
     ];
     const dirs_actual = resolver.getModulePaths(cwd);
